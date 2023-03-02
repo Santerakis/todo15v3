@@ -13,11 +13,13 @@ import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
 import { Menu } from '@mui/icons-material';
 // import {LinearProgress} from "@mui/material";
-import LinearProgress from "@mui/material/LinearProgress";  //переделали чтобы все не тянуть в проект
+import LinearProgress from "@mui/material/LinearProgress";
+import {useSelector} from "react-redux";
+import {useAppSelector} from "./store";  //переделали чтобы все не тянуть в проект
 
 
 function App() {
-
+    const status = useAppSelector(state => state.app.status)
     return (
         <div className="App">
             <AppBar position="static">
@@ -31,7 +33,7 @@ function App() {
                     <Button color="inherit">Login</Button>
                 </Toolbar>
             </AppBar>
-            <LinearProgress color="secondary" />
+            {status === 'loading' && <LinearProgress color="secondary"/>}
             <Container fixed>
                 <TodolistsList/>
             </Container>
