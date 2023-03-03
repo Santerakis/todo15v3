@@ -17,7 +17,7 @@ export function ErrorSnackbar() {
 
     const handleClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
         if (reason === 'clickaway') {
-            return
+            // return    //не зает закрывать при клике снаружи. Можно навешать логику для клика по экрану перед закрытием
         }
         // setOpen(false)
         dispatch(setErrorAC(null))
