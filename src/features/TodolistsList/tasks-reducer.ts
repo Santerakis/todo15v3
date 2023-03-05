@@ -1,4 +1,9 @@
-import {AddTodolistActionType, RemoveTodolistActionType, SetTodolistsActionType} from './todolists-reducer'
+import {
+    AddTodolistActionType,
+    RemoveTodolistActionType,
+    setEntityStatusAC,
+    SetTodolistsActionType
+} from './todolists-reducer'
 import {TaskPriorities, TaskStatuses, TaskType, todolistsAPI, UpdateTaskModelType} from '../../api/todolists-api'
 import {Dispatch} from 'redux'
 import {AppRootStateType} from '../../app/store'
@@ -81,12 +86,14 @@ export const addTaskTC = (title: string, todolistId: string) => (dispatch: Dispa
                 if (res.data.messages.length) {
                     dispatch(setErrorAC(res.data.messages[0]))
                 } else {
-                   dispatch(setErrorAC('Some error')) // если бэк не описывает ошибку
+                    dispatch(setErrorAC('Some error')) // если бэк не описывает ошибку
                 }
                 dispatch(setLoadingStatusAC('failed'))
             }
         })
-        .catch(() => {
+        .catch((e) => {
+            dispatch(setErrorAC(e.message))
+            dispatch(setLoadingStatusAC('failed'))
         })
 }
 export const updateTaskTC = (taskId: string, domainModel: UpdateDomainTaskModelType, todolistId: string) =>
@@ -113,10 +120,25 @@ export const updateTaskTC = (taskId: string, domainModel: UpdateDomainTaskModelT
         dispatch(setLoadingStatusAC('loading'))
         todolistsAPI.updateTask(todolistId, taskId, apiModel)
             .then(res => {
-                const action = updateTaskAC(taskId, domainModel, todolistId)
-                dispatch(action)
+                if (res.data.resultCode === 0) {     //ResultCode.SECCEEDED
+                    const action = updateTaskAC(taskId, domainModel, todolistId)
+                    dispatch(action)
+                    dispatch(setLoadingStatusAC('succeeded'))
+                } else {
+                    if (res.data.messages.length) {
+                        dispatch(setErrorAC(res.data.messages[0]))
+                    } else {
+                        dispatch(setErrorAC('Some error')) // если бэк не описывает ошибку
+                    }
+                    dispatch(setLoadingStatusAC('failed'))
+                }
+
             })
-        dispatch(setLoadingStatusAC('succeeded'))
+            .catch((e) => {
+                dispatch(setErrorAC(e.message))
+                dispatch(setLoadingStatusAC('failed'))
+            })
+
     }
 
 // types

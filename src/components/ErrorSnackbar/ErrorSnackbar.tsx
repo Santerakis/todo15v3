@@ -3,6 +3,7 @@ import Snackbar from '@mui/material/Snackbar'
 import MuiAlert, { AlertProps } from '@mui/material/Alert'
 import {useAppDispatch, useAppSelector} from "../../app/store";
 import {setErrorAC} from "../../app/app-reducer";
+import {AlertColor} from "@mui/material/Alert/Alert";
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
     props, ref) {
@@ -22,6 +23,12 @@ export function ErrorSnackbar() {
         // setOpen(false)
         dispatch(setErrorAC(null))
     }
+
+    // const test = (value: any): AlertColor => {                // для изменения цвета алерта
+    //     return 'success' | 'info' | 'warning' | 'error'       //для test: severity={test('')}
+    //     ... тернарниками проверки
+    // }
+
     return (
         <Snackbar open={!!error} autoHideDuration={6000} onClose={handleClose}>
             <Alert onClose={handleClose} severity='error' sx={{width: '100%'}}>
