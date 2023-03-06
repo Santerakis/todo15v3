@@ -1,6 +1,6 @@
 import {todolistsAPI, TodolistType} from '../../api/todolists-api'
 import {Dispatch} from 'redux'
-import {setLoadingStatusAC, SetLoadingStatusType} from "../../app/app-reducer";
+import {RequestStatusType, setLoadingStatusAC, SetLoadingStatusType} from "../../app/app-reducer";
 
 const initialState: Array<TodolistDomainType> = []
 
@@ -38,7 +38,7 @@ export const setTodolistsAC = (todolists: Array<TodolistType>) => ({type: 'SET-T
 
 // thunks
 export const fetchTodolistsTC = () => {
-    return (dispatch: Dispatch<ActionsType>) => {
+    return (dispatch: Dispatch<ActionsType>) => {   //тип который принемает конкретный диспач
         dispatch(setLoadingStatusAC('loading'))
         todolistsAPI.getTodolists()
             .then((res) => {
@@ -50,7 +50,7 @@ export const fetchTodolistsTC = () => {
     }
 }
 export const removeTodolistTC = (todolistId: string) => {
-    return (dispatch: Dispatch<ActionsType>) => {
+    return (dispatch: Dispatch<ActionsType>) => {             //в продакшене не указывается тип AC (dispatch: Dispatch)
         dispatch(setLoadingStatusAC('loading'))
         todolistsAPI.deleteTodolist(todolistId)
             .then((res) => {
@@ -94,4 +94,5 @@ type ActionsType =
 export type FilterValuesType = 'all' | 'active' | 'completed';
 export type TodolistDomainType = TodolistType & {
     filter: FilterValuesType
+    entityStatus: RequestStatusType
 }

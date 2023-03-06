@@ -68,11 +68,34 @@ export const removeTaskTC = (taskId: string, todolistId: string) => (dispatch: D
             dispatch(setLoadingStatusAC('succeeded'))
         })
 }
+                               // енамка - тайпскриптовая функция
+enum ResultCore {             //енамки для именования меджик чисел, для лучшей читабельности
+    SUCCEEDED = 0,            // какое число что означает, когда приходит медж.нам с бэка
+    FAILED = 1,
+    CAPTCHA = 10
+}
+
+///////////пример если с бека приходит на анг, а нам надо рус
+enum BUTTON_NAMES {
+    name = 'Имя',
+    number = 'Число'
+}
+const result = 'name'
+const string = BUTTON_NAMES[result]
+
+const  data = {
+    key: 'name'
+} as const
+
+const string2 = BUTTON_NAMES[data.key]
+////////////////
+
+
 export const addTaskTC = (title: string, todolistId: string) => (dispatch: Dispatch<ActionsType>) => {
     dispatch(setLoadingStatusAC('loading'))
     todolistsAPI.createTask(todolistId, title)
         .then(res => {
-            if (res.data.resultCode === 0) {
+            if (res.data.resultCode === 0) {   //лучше (res.data.resultCode === ResultCore.SUCCEEDED)
                 const task = res.data.data.item
                 const action = addTaskAC(task)
                 dispatch(action)

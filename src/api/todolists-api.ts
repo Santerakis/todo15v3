@@ -50,6 +50,11 @@ export type ResponseType<D = {}> = {
     data: D
 }
 
+// export enum ResultCore {
+//     SUCCEEDED = 0,
+//     FAILED = 1,
+//     CAPTCHA = 10
+// }
 
 export enum TaskStatuses {
     New = 0,
