@@ -16,7 +16,7 @@ import {Dispatch} from 'redux'
 import {AppRootStateType} from '../../app/store'
 import {setErrorAC, SetErrorType, setLoadingStatusAC, SetLoadingStatusType} from "../../app/app-reducer";
 import {handleServerAppError, handleServerNetworkError} from "../../utils/error-utils";
-import {AxiosError} from "axios";
+import axios, {AxiosError} from "axios";
 
 const initialState: TasksStateType = {}
 
@@ -73,14 +73,36 @@ export const fetchTasksTC = (todolistId: string) => (dispatch: Dispatch<ActionsT
             dispatch(setLoadingStatusAC('succeeded'))
         })
 }
-export const removeTaskTC = (taskId: string, todolistId: string) => (dispatch: Dispatch<ActionsType>) => {
+export const removeTaskTC = (taskId: string, todolistId: string) => async (dispatch: Dispatch<ActionsType>) => {
     dispatch(setLoadingStatusAC('loading'))
-    todolistsAPI.deleteTask(todolistId, taskId)
-        .then(res => {
-            const action = removeTaskAC(taskId, todolistId)
-            dispatch(action)
+    try {
+        const result = await todolistsAPI.deleteTask(todolistId, taskId)  //если зарезолвится
+        if (result.data.resultCode === ResultCore.SUCCEEDED) {
+            dispatch(removeTaskAC(taskId, todolistId))
             dispatch(setLoadingStatusAC('succeeded'))
-        })
+        } else {
+            handleServerAppError(result.data, dispatch)
+        }
+    } catch (e) {
+        if (axios.isAxiosError<ErrorCustomType>(e)) {
+            const error = e.response ?e.response.data.messages :e.message  // это как типизируем объект с бека который ErrorCustomType
+            const error1 = e.response?.data  //У Игната так
+            const v_action_kprimeru = error1?.messages
+            const error2 = e.response?.data.messages
+            handleServerNetworkError(dispatch, e)
+        } else {
+            console.log('...если ошибка не связана с беком')
+        }
+
+    }
+
+
+
+    // .then(res => {
+    //     const action = removeTaskAC(taskId, todolistId)
+    //     dispatch(action)
+    //     dispatch(setLoadingStatusAC('succeeded'))
+    // })
 }
 
 // енамка - тайпскриптовая функция

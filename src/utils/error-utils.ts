@@ -1,7 +1,7 @@
 import {AppActionsType, setErrorAC, setLoadingStatusAC} from "../app/app-reducer";
 import {Dispatch} from "redux";
 import {ResponseType} from "../api/todolists-api"
-
+                                                                    //другие поля не протипизировали т.к. нао они не интересуетб взяли то что на до для тип что бы типскрипт понимал
 export const handleServerNetworkError = (dispatch: ErrorUtilsDispatchType, error: { message: string }) => {
     dispatch(setErrorAC(error.message))
     dispatch(setLoadingStatusAC('failed'))
