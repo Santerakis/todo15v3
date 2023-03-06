@@ -1,6 +1,8 @@
-import {todolistsAPI, TodolistType} from '../../api/todolists-api'
+import {ResultCore, TaskType, todolistsAPI, TodolistType} from '../../api/todolists-api'
 import {Dispatch} from 'redux'
 import {RequestStatusType, setErrorAC, SetErrorType, setLoadingStatusAC, SetLoadingStatusType} from "../../app/app-reducer";
+import {handleServerAppError, handleServerNetworkError} from "../../utils/error-utils";
+// import {ResponseType} from "../../api/todolists-api"
 
 const initialState: Array<TodolistDomainType> = []
 
@@ -75,8 +77,13 @@ export const addTodolistTC = (title: string) => {
         dispatch(setLoadingStatusAC('loading'))
         todolistsAPI.createTodolist(title)
             .then((res) => {
-                dispatch(addTodolistAC(res.data.data.item))
-                dispatch(setLoadingStatusAC('succeeded'))
+                if (res.data.resultCode === ResultCore.SUCCEEDED) {
+                    dispatch(addTodolistAC(res.data.data.item))
+                    dispatch(setLoadingStatusAC('succeeded'))
+                } else {                     // то бы сделать динамическое подставление типов - надо использовать джин. функцию
+                    handleServerAppError<{ item: TodolistType }>(res.data, dispatch) //явно указали с каим типом будет работать
+                }                                                                 // но <{ item: TodolistType }> это излишне
+
             })
     }
 }

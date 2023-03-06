@@ -1,13 +1,16 @@
+import {AddTodolistActionType, RemoveTodolistActionType, setEntityStatusAC, SetTodolistsActionType} from './todolists-reducer'
 import {
-    AddTodolistActionType,
-    RemoveTodolistActionType,
-    setEntityStatusAC,
-    SetTodolistsActionType
-} from './todolists-reducer'
-import {TaskPriorities, TaskStatuses, TaskType, todolistsAPI, UpdateTaskModelType} from '../../api/todolists-api'
+    ResponseType,
+    TaskPriorities,
+    TaskStatuses,
+    TaskType,
+    todolistsAPI,
+    UpdateTaskModelType
+} from '../../api/todolists-api'
 import {Dispatch} from 'redux'
 import {AppRootStateType} from '../../app/store'
 import {setErrorAC, SetErrorType, setLoadingStatusAC, SetLoadingStatusType} from "../../app/app-reducer";
+import {handleServerAppError, handleServerNetworkError} from "../../utils/error-utils";
 
 const initialState: TasksStateType = {}
 
@@ -105,18 +108,12 @@ export const addTaskTC = (title: string, todolistId: string) => (dispatch: Dispa
                 const action = addTaskAC(task)
                 dispatch(action)
                 dispatch(setLoadingStatusAC('succeeded'))
-            } else {
-                if (res.data.messages.length) {
-                    dispatch(setErrorAC(res.data.messages[0]))
-                } else {
-                    dispatch(setErrorAC('Some error')) // если бэк не описывает ошибку
-                }
-                dispatch(setLoadingStatusAC('failed'))
-            }
+            } else {              // то бы сделать динамическое подставление типов - надо использовать джин. функцию
+                handleServerAppError<{ item: TaskType }>(res.data, dispatch) //<{ item: TaskType }> излишне это уточнение
+            }                                   // т.к. это уточнение делается динамически в момент вызова функции
         })
         .catch((e) => {
-            dispatch(setErrorAC(e.message))
-            dispatch(setLoadingStatusAC('failed'))
+            handleServerNetworkError(dispatch, e)
         })
 }
 export const updateTaskTC = (taskId: string, domainModel: UpdateDomainTaskModelType, todolistId: string) =>
@@ -157,9 +154,8 @@ export const updateTaskTC = (taskId: string, domainModel: UpdateDomainTaskModelT
                 }
 
             })
-            .catch((e) => {
-                dispatch(setErrorAC(e.message))
-                dispatch(setLoadingStatusAC('failed'))
+            .catch((e) => {                                  //нет вортовские ошибки
+                handleServerNetworkError(dispatch, e)        //диспатч, который приходит в санку (из замыкания)
             })
 
     }
