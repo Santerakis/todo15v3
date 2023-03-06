@@ -1,4 +1,9 @@
-import {AddTodolistActionType, RemoveTodolistActionType, setEntityStatusAC, SetTodolistsActionType} from './todolists-reducer'
+import {
+    AddTodolistActionType,
+    RemoveTodolistActionType,
+    setEntityStatusAC,
+    SetTodolistsActionType
+} from './todolists-reducer'
 import {
     ResponseType,
     TaskPriorities,
@@ -11,6 +16,7 @@ import {Dispatch} from 'redux'
 import {AppRootStateType} from '../../app/store'
 import {setErrorAC, SetErrorType, setLoadingStatusAC, SetLoadingStatusType} from "../../app/app-reducer";
 import {handleServerAppError, handleServerNetworkError} from "../../utils/error-utils";
+import {AxiosError} from "axios";
 
 const initialState: TasksStateType = {}
 
@@ -76,7 +82,8 @@ export const removeTaskTC = (taskId: string, todolistId: string) => (dispatch: D
             dispatch(setLoadingStatusAC('succeeded'))
         })
 }
-                               // енамка - тайпскриптовая функция
+
+// енамка - тайпскриптовая функция
 enum ResultCore {             //енамки для именования меджик чисел, для лучшей читабельности
     SUCCEEDED = 0,            // какое число что означает, когда приходит медж.нам с бэка
     FAILED = 1,
@@ -88,10 +95,11 @@ enum BUTTON_NAMES {
     name = 'Имя',
     number = 'Число'
 }
+
 const result = 'name'
 const string = BUTTON_NAMES[result]
 
-const  data = {
+const data = {
     key: 'name'
 } as const
 
@@ -111,7 +119,7 @@ export const addTaskTC = (title: string, todolistId: string) => (dispatch: Dispa
             } else {              // то бы сделать динамическое подставление типов - надо использовать джин. функцию
                 handleServerAppError<{ item: TaskType }>(res.data, dispatch) //<{ item: TaskType }> излишне это уточнение
             }                                   // т.к. это уточнение делается динамически в момент вызова функции
-        })
+        })                           // это явная типизация, для читабельности
         .catch((e) => {
             handleServerNetworkError(dispatch, e)
         })
@@ -153,12 +161,17 @@ export const updateTaskTC = (taskId: string, domainModel: UpdateDomainTaskModelT
                     dispatch(setLoadingStatusAC('failed'))
                 }
 
-            })
-            .catch((e) => {                                  //нет вортовские ошибки
-                handleServerNetworkError(dispatch, e)        //диспатч, который приходит в санку (из замыкания)
-            })
-
+            })                                     //network ошибки
+            .catch((e: AxiosError<ErrorCustomType>) => {            //диспатч, который приходит в санку (из замыкания)
+                const error = e.response ? e.response.data.messages[0] : e.message
+                handleServerNetworkError(dispatch, e)
+            })                              //e.response.data.message -ошибка е бека(res-необ. поле) или
+                                            //e.message -network(axios) ошибка (mes-всегда, но если бек вернул ошибку то пустым будет(оно ляжет в res))
     }
+type ErrorCustomType = {          //back object error  протипиз чтобы типскр подсказывал
+    messages: string[]             //будет лежать в response.data
+    fielError: string
+}
 
 // types
 export type UpdateDomainTaskModelType = {
